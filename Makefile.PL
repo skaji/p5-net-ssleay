@@ -149,6 +149,8 @@ foreach my $arg (reverse @ARGV)
     $arg .= ' ' . delete $eumm_args{DEFINE};
     last;
 }
+# MakeMaker does not include pm_to_blib in its default overridable methods.
+push @ExtUtils::MakeMaker::Overridable, 'pm_to_blib';
 WriteMakefile(%eumm_args);
 
 sub MY::postamble {
@@ -156,6 +158,19 @@ sub MY::postamble {
 SSLeay$Config{'obj_ext'} : constants.c
 
 MAKE
+}
+
+sub MY::pm_to_blib {
+    my $self = shift;
+    my $rules = $self->MM::pm_to_blib(@_);
+
+    # Check full filenames on filesystems that support long filenames,
+    # rather than warning about collisions under DOS's 8-character limit.
+    if ( $Config{d_flexfnam} eq 'define' ) {
+        $rules =~ s/\bpm_to_blib\(/require AutoSplit; local \$\$AutoSplit::Maxlen = 255; pm_to_blib(/g;
+    }
+
+    return $rules;
 }
 
 # Prepends the C compiler flag in the second parameter to the string of compiler

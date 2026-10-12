@@ -3983,11 +3983,11 @@ X509_check_ip_asc(X509 *cert, const char *address, unsigned int flags = 0)
 
 #endif
 
-X509_NAME*
+const X509_NAME *
 X509_get_issuer_name(cert)
      X509 *      cert
 
-X509_NAME*
+const X509_NAME *
 X509_get_subject_name(cert)
      X509 *      cert
 
@@ -4185,13 +4185,13 @@ X509_NAME_cmp(const X509_NAME *a, const X509_NAME *b)
 int
 X509_NAME_entry_count(X509_NAME *name)
 
-X509_NAME_ENTRY *
+const X509_NAME_ENTRY *
 X509_NAME_get_entry(X509_NAME *name, int loc)
 
-ASN1_STRING *
+const ASN1_STRING *
 X509_NAME_ENTRY_get_data(X509_NAME_ENTRY *ne)
 
-ASN1_OBJECT *
+const ASN1_OBJECT *
 X509_NAME_ENTRY_get_object(X509_NAME_ENTRY *ne)
 
 void
@@ -4212,7 +4212,7 @@ X509_CRL_sort(X509_CRL *x)
 long
 X509_CRL_get_version(X509_CRL *x)
 
-X509_NAME *
+const X509_NAME *
 X509_CRL_get_issuer(X509_CRL *x)
 
 #if (OPENSSL_VERSION_NUMBER >= 0x1010000f && !defined(LIBRESSL_VERSION_NUMBER)) || (LIBRESSL_VERSION_NUMBER >= 0x2070000fL)
@@ -4346,7 +4346,7 @@ X509_REQ_new()
 void
 X509_REQ_free(X509_REQ *x)
 
-X509_NAME *
+const X509_NAME *
 X509_REQ_get_subject_name(X509_REQ *x)
 
 int
@@ -4401,7 +4401,7 @@ P_X509_REQ_get_attr(req,n)
         X509_ATTRIBUTE * att;
         int count, i;
         ASN1_STRING * s;
-	ASN1_TYPE * t;
+	const ASN1_TYPE * t;
     PPCODE:
         att = X509_REQ_get_attr(req,n);
 	count = X509_ATTRIBUTE_count(att);
@@ -4520,7 +4520,7 @@ P_X509_copy_extensions(x509_req,x509,override=1)
     PREINIT:
         STACK_OF(X509_EXTENSION) *exts = NULL;
         X509_EXTENSION *ext, *tmpext;
-        ASN1_OBJECT *obj;
+        const ASN1_OBJECT *obj;
         int i, idx, ret = 1;
     PPCODE:
         if (!x509 || !x509_req) XSRETURN_IV(0);
@@ -4633,7 +4633,11 @@ X509_get_subjectAltNames(cert)
 	X509 *      cert
 	PREINIT:
 	int                    i, j, count = 0;
+#if OPENSSL_VERSION_NUMBER >= 0x40000000L && !defined(LIBRESSL_VERSION_NUMBER)
+	const X509_EXTENSION   *subjAltNameExt = NULL;
+#else
 	X509_EXTENSION         *subjAltNameExt = NULL;
+#endif
 	STACK_OF(GENERAL_NAME) *subjAltNameDNs = NULL;
 	GENERAL_NAME           *subjAltNameDN  = NULL;
 	int                    num_gnames;
@@ -4871,7 +4875,7 @@ X509_get_ext_by_NID(x,nid,loc=-1)
 	int nid
 	int loc
 
-X509_EXTENSION *
+const X509_EXTENSION *
 X509_get_ext(x,loc)
 	X509* x
 	int loc
@@ -4879,10 +4883,10 @@ X509_get_ext(x,loc)
 int
 X509_EXTENSION_get_critical(X509_EXTENSION *ex)
 
-ASN1_OCTET_STRING *
+const ASN1_OCTET_STRING *
 X509_EXTENSION_get_data(X509_EXTENSION *ne)
 
-ASN1_OBJECT *
+const ASN1_OBJECT *
 X509_EXTENSION_get_object(X509_EXTENSION *ex)
 
 int
@@ -4897,7 +4901,7 @@ X509_CRL_get_ext_by_NID(x,ni,loc=-1)
         int ni
         int loc
 
-X509_EXTENSION *
+const X509_EXTENSION *
 X509_CRL_get_ext(x,loc)
    X509_CRL* x
    int loc
@@ -5159,12 +5163,12 @@ const ASN1_TIME *
 X509_get0_notAfter(const X509 *cert)
 
 ASN1_TIME *
-X509_getm_notBefore(const X509 *cert)
+X509_getm_notBefore(X509 *cert)
 	ALIAS:
 		X509_get_notBefore = 1
 
 ASN1_TIME *
-X509_getm_notAfter(const X509 *cert)
+X509_getm_notAfter(X509 *cert)
 	ALIAS:
 		X509_get_notAfter = 1
 
@@ -8179,7 +8183,11 @@ void
 X509_get_X509_PUBKEY(x)
    const X509 *x
    PREINIT:
+#if OPENSSL_VERSION_NUMBER >= 0x40000000L && !defined(LIBRESSL_VERSION_NUMBER)
+   const X509_PUBKEY *pkey;
+#else
    X509_PUBKEY *pkey;
+#endif
    STRLEN len;
    unsigned char *pc, *pi;
    PPCODE:
